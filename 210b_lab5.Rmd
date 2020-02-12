@@ -1,0 +1,437 @@
+---
+title: "210b_lab5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(kableExtra)
+
+```
+
+&nbsp;  # forced linebreak
+
+### 1) Climate Change - Elevational Distribution Change
+
+**As the world warms, the geographic ranges of species might shift toward cooler areas. Chen et al. (2011) studied recent changes in the highest elevation at which species occur. Typically, higher elevations are cooler than lower elevations. Below are the changes in the highest elevation for 31 taxa, in meters, over the late 1900s and early 2000s. Positive numbers indicate upward shifts in elevation, and negative numbers indicate shifts to lower elevations.**
+
+```{r}
+
+elev_change <- c(58.9, 7.8, 108.6, 44.8, 11.1, 19.2, 61.9, 30.5, 12.7, 35.8, 7.4, 39.3, 24.0, 62.1, 24.3, 55.3, 32.7, 65.3, -19.3, 7.6, -5.2, -2.1, 31.0, 69.0, 88.6, 39.5, 20.7, 89.0, 69.0, 64.9, 64.8)
+
+```
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### a) What is the sample size n?
+
+The sample size is **`r length(elev_change)`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### b) What is the mean of the data points?
+
+```{r}
+
+elev_change_mean <- mean(elev_change)
+
+```
+
+The mean is **`r elev_change_mean`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### c) What is the standard deviation of elevational range shift?
+
+```{r}
+
+elev_change_std <- sd(elev_change)
+
+```
+
+The standard deviation is **`r elev_change_std`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### d) What is the standard error of the mean for these data?
+
+
+```{r}
+
+elev_change_sterr <- elev_change_std/sqrt(length(elev_change))
+
+```
+
+The standard error is **`r elev_change_sterr`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### e) How many degrees of freedom will be associated with a confidence interval and a one-sample t-test for the mean elevation shift?
+
+```{r}
+
+# df is one less than n because we have to estimate the stdev from the sample
+elev_change_df <- length(elev_change) - 1
+
+```
+
+This process will have **`r elev_change_df`** degrees of freedom.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### f) What values of $\alpha$ is needed for a 95% confidence interval?
+
+For a 95% confidence interval we have $\alpha$ = 0.025
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### g) What is the critical value of t for this $\alpha$ and number of degrees of freedom?
+
+```{r}
+
+elev_t_crit <- qt(0.975, elev_change_df)
+
+```
+
+This  confidence interval / df combination will have a critical t value of **`r elev_t_crit`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### h) What assumptions are necessary to use the confidence interval calculations?
+
+1) We have a random sample from the population of specific elevation changes.
+
+2) The actual distribution of elevation change values is normally distributed.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### i) Calculate the 95% confidence interval for the mean using these data.
+
+```{r}
+
+spread_95 <- qt(0.975, df=elev_change_df) * elev_change_std/sqrt(length(elev_change))
+
+elev_change_lower <- elev_change_mean - spread_95
+elev_change_upper <- elev_change_mean + spread_95
+
+```
+
+A 95% confidence interval for the true mean change in upper elevation limit across montane species is given by:
+
+
+**`r round(elev_change_lower,3)` $<\mu_{elev\_change} <$ `r round(elev_change_upper,3)`**
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### j) For the one-sample t-test, write the appropriate null and alternative hypotheses.
+
+$H_o:$ There is no significant change in upper elevation limit across species.
+
+$H_a:$ There is a significant change in upper elevation limit across species.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### k) Calculate the test statistic t for this test.
+
+```{r}
+
+elev_test <- t.test(elev_change)
+
+```
+
+I ran a one-sample t-test and found ***t*(`r elev_test$parameter`) = `r elev_test$statistic`, *p-value* = `r sprintf("%0.3g", elev_test$p.value)`**
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### l) What assumptions are necessary to do a one-sample t-test?
+
+They're the same as for the confidence interval: 
+
+1) We have a random sample from the population of specific elevation changes.
+
+2) The actual distribution of elevation change values is normally distributed.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### m) Describe the P-value for this test.
+
+The p-value we returned above is VERY LOW (`r sprintf("%0.3g", elev_test$p.value)`).
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### n) Did species change their highest elevation on average?
+
+Because the p-value we got is VERY LOW, we can reject the null hypothesis that there was no overall change in maximum elevation across species. There does appear to have been a change in upper elevation limits. 
+
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+
+
+
+
+
+
+
+
+
+### 2) A tolerable level of a certain pollutant is 16 mg/l. A researcher takes a sample of size n = 50, and finds that the mean level of the pollutant is 18.5 mg/l, with a standard deviation of 7 mg/l. Construct a 95% confidence interval around the same mean, and determine whether the tolerable level is within this interval.
+
+Because the sample size is relatively small, we'll use a t distribution.
+
+```{r}
+
+n_poll = 50
+mean_poll = 18.5
+std_poll = 7
+
+spread_95 <- qt(0.975, df=n_poll-1) * std_poll/sqrt(n_poll)
+
+poll_change_lower <- mean_poll - spread_95
+poll_change_upper <- mean_poll + spread_95
+
+```
+
+A 95% confidence interval for the true mean value of pollutant (in mg/L) in the water is given by:
+
+**`r round(poll_change_lower,3)` $<\mu_{pollutant} <$ `r round(poll_change_upper,3)`**
+
+This range **DOES NOT INCLUDE** the 'tolerable' level guideline of 16 mg/L, so we can conclude that the pollution levels here are not tolerable.
+
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+
+
+
+
+
+
+
+### 3) Refer back to problem 1. Using the same data, calculate the 95% confidence interval for the variance using the following steps.
+
+#### a) What does the confidence interval refer to — the sample variance or the population variance?
+
+The confidence interval attempts to use information from the sample variance to make claims about the population variance. 
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### b) What assumptions are necessary for construction of the confidence interval for variance?
+
+1) The data must be a random sample of the actual population
+
+2) The true population variable must be normally distributed. 
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### c) What is the sample variance of these data?
+
+```{r}
+
+elev_var <- var(elev_change)
+
+```
+
+The sample variance is **`r elev_var`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### d) How many degrees of freedom are associated with these data for estimates of variance?
+
+As before, the number of degrees of freedom is **`r elev_change_df`**.
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### e) What is \alpha for this analysis?
+
+As before, the one-sided $\alpha$ value is 0.025 for a two-sided 95% confidence interval. 
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### f) Find the critical value of $\chi^2$ for $\alpha/2$?
+
+```{r}
+
+elev_critical_chi_hi = qchisq(0.025, df=elev_change_df)
+
+```
+
+**$\chi^2(df=$ `r elev_change_df` $,1-\frac{\alpha}{2}=0.025) =$ `r elev_critical_chi_hi`**
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### g) What is the critical value of $\chi^2$ for $\alpha/2$?
+
+```{r}
+
+elev_critical_chi_low = qchisq(0.975, df=elev_change_df)
+
+```
+
+**$\chi^2(df=$ `r elev_change_df` $,\frac{\alpha}{2}=0.025) =$ `r elev_critical_chi_low``**
+
+
+<!-- forced_linebreak -->
+&nbsp; 
+
+#### h) Calculate the 95% confidence interval for the variance of the elevational range shift.
+
+\[
+\frac{(n-1)s^2}{\chi^2_{\alpha/2}} < \sigma^2 < \frac{(n-1)s^2}{\chi^2_{1-\alpha/2}}
+\]
+
+```{r}
+
+elev_var_low <- (length(elev_change)-1) * elev_change_std^2 / elev_critical_chi_low
+elev_var_hi <- (length(elev_change)-1) * elev_change_std^2 / elev_critical_chi_hi
+
+```
+
+A 95% confidence interval for the true variance of the change in upper elevation limit across montane species is given by:
+
+**`r round(elev_var_low,3)` $<\sigma^2_{elev\_change} <$ `r round(elev_var_hi,3)`**
+
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+
+
+
+
+
+
+### 4) Measurements of the distance between the canine tooth and last molar for 35 wolf upper jaws were made by researchers. They found the 95% confidence interval for the mean to be 10.17 cm < $\mu$ < 10.47 cm and the 99% confidence interval to be 10.21 cm < $\mu$ < 10.44 cm. Without seeing the data, explain why they must have made a mistake.
+
+The 99% confidence should actually be WIDER than the 95% confidence interval, because it contains a larger percentage of the distribution. Their 99% confidence interval was reported as narrower than the 95% one, which doesn't make sense. 
+
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+<!-- forced_linebreak -->
+&nbsp; 
+
+
+
+
+
+
+
+### 5) Here are the data on wolf upper jaws from previous problem in cm. There are 35 individuals in this data set. Assume that this variable is normally distributed. 
+
+```{r}
+
+wolf_jaws <- data.frame(length=c(10.2, 10.4, 9.9, 10.7, 10.3, 9.7, 10.3, 10.7, 10.1, 10.6, 10.3, 10.0, 10.2, 10.1, 10.3, 9.9, 9.7, 10.6, 10.4, 10.1, 10.6, 10.3, 10.3, 10.5, 10.2, 10.2, 10.5, 10.1, 11.2, 10.5, 10.3, 10.0, 10.3, 10.7, 11.1))
+
+```
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### a. Plot the histogram to confirm that frequency distribution is roughly bell shaped.
+
+```{r}
+
+ggplot(data=wolf_jaws) + 
+  geom_histogram(aes(x=length)) + 
+  ggtitle('Wolf Jaw Lengths') + 
+  xlab('Jaw length (cm)') + 
+  ylab('Frequency') + 
+  theme_minimal()
+
+```
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### b. What are the sample mean and standard error of the mean for this data set?
+
+```{r}
+
+jaw_mean <- mean(wolf_jaws$length)
+jaw_std <- sd(wolf_jaws$length)
+
+```
+
+In this sample, the mean jaw length was **`r jaw_mean` cm** and the stdev was **`r jaw_std` cm**.
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### c. Find the 95% confidence interval for the mean.
+
+We'll use a t distribution, because the sample size is small. 
+
+```{r}
+
+spread_95 <- qt(0.975, df=nrow(wolf_jaws)-1) * jaw_std/sqrt(nrow(wolf_jaws))
+
+jaw_lower <- jaw_mean - spread_95
+jaw_upper <- jaw_mean + spread_95
+
+```
+
+A 95% confidence interval for the true mean jaw length for wolves from this population is:
+
+
+**`r round(jaw_lower,3)` $<\mu_{jaw\_length} <$ `r round(jaw_upper,3)`**
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### d. Find the 99% confidence interval for the variance.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### e) Find the 99% confidence interval for the standard deviation.
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+
+
+
+
