@@ -41,7 +41,7 @@ elev_change_mean <- mean(elev_change)
 
 ```
 
-The mean is **`r elev_change_mean`**.
+The mean is **`r elev_change_mean` m**.
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -54,7 +54,7 @@ elev_change_std <- sd(elev_change)
 
 ```
 
-The standard deviation is **`r elev_change_std`**.
+The standard deviation is **`r elev_change_std` m**.
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -68,7 +68,7 @@ elev_change_sterr <- elev_change_std/sqrt(length(elev_change))
 
 ```
 
-The standard error is **`r elev_change_sterr`**.
+The standard error is **`r elev_change_sterr` m**.
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -89,7 +89,7 @@ This process will have **`r elev_change_df`** degrees of freedom.
 
 #### f) What values of $\alpha$ is needed for a 95% confidence interval?
 
-For a 95% confidence interval we have $\alpha$ = 0.025
+For a 95% confidence interval we have $\alpha$ = 0.05, which is split into two $\alpha/2=0.025$ chunks on either extreme end of the interval.
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -130,7 +130,7 @@ elev_change_upper <- elev_change_mean + spread_95
 A 95% confidence interval for the true mean change in upper elevation limit across montane species is given by:
 
 
-**`r round(elev_change_lower,3)` $<\mu_{elev\_change} <$ `r round(elev_change_upper,3)`**
+**`r round(elev_change_lower,3)` m $<\mu_{elev\_change} <$ `r round(elev_change_upper,3)` m**
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -152,7 +152,7 @@ elev_test <- t.test(elev_change)
 
 ```
 
-I ran a one-sample t-test and found ***t*(`r elev_test$parameter`) = `r elev_test$statistic`, *p-value* = `r sprintf("%0.3g", elev_test$p.value)`**
+I ran a one-sample t-test and found ***t*(*df*=`r elev_test$parameter`) = `r elev_test$statistic`, *p-value* = `r sprintf("%0.3g", elev_test$p.value)`**
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -213,7 +213,7 @@ poll_change_upper <- mean_poll + spread_95
 
 A 95% confidence interval for the true mean value of pollutant (in mg/L) in the water is given by:
 
-**`r round(poll_change_lower,3)` $<\mu_{pollutant} <$ `r round(poll_change_upper,3)`**
+**`r round(poll_change_lower,3)` mg/L $<\mu_{pollutant} <$ `r round(poll_change_upper,3)` mg/L**
 
 This range **DOES NOT INCLUDE** the 'tolerable' level guideline of 16 mg/L, so we can conclude that the pollution levels here are not tolerable.
 
@@ -234,7 +234,7 @@ This range **DOES NOT INCLUDE** the 'tolerable' level guideline of 16 mg/L, so w
 
 #### a) What does the confidence interval refer to — the sample variance or the population variance?
 
-The confidence interval attempts to use information from the sample variance to make claims about the population variance. 
+The confidence interval attempts to use information from the sample variance to make claims about the population variance. The interval given is a projection about the values of the population variance.
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -256,7 +256,7 @@ elev_var <- var(elev_change)
 
 ```
 
-The sample variance is **`r elev_var`**.
+The sample variance is **`r elev_var` $m^2$**.
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -270,7 +270,7 @@ As before, the number of degrees of freedom is **`r elev_change_df`**.
 
 #### e) What is \alpha for this analysis?
 
-As before, the one-sided $\alpha$ value is 0.025 for a two-sided 95% confidence interval. 
+As before, the $\alpha$ value is 0.05, which is split into two $\alpha/2=0.025$ chunks for a two-sided 95% confidence interval. 
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -288,7 +288,7 @@ elev_critical_chi_hi = qchisq(0.025, df=elev_change_df)
 <!-- forced_linebreak -->
 &nbsp; 
 
-#### g) What is the critical value of $\chi^2$ for $\alpha/2$?
+#### g) What is the critical value of $\chi^2$ for $1-\alpha/2$?
 
 ```{r}
 
@@ -317,7 +317,7 @@ elev_var_hi <- (length(elev_change)-1) * elev_change_std^2 / elev_critical_chi_h
 
 A 95% confidence interval for the true variance of the change in upper elevation limit across montane species is given by:
 
-**`r round(elev_var_low,3)` $<\sigma^2_{elev\_change} <$ `r round(elev_var_hi,3)`**
+**`r round(elev_var_low,3)` $m^2$ $<\sigma^2_{elev\_change} <$ `r round(elev_var_hi,3)` $m^2$**
 
 <!-- forced_linebreak -->
 &nbsp; 
@@ -373,6 +373,8 @@ ggplot(data=wolf_jaws) +
 
 ```
 
+This does look more or less bell-shaped, although there aren't that many data points, so it's a bit of a messy bell.
+
 <!-- forced_linebreak -->
 &nbsp;
 
@@ -381,11 +383,11 @@ ggplot(data=wolf_jaws) +
 ```{r}
 
 jaw_mean <- mean(wolf_jaws$length)
-jaw_std <- sd(wolf_jaws$length)
+jaw_sterr <- sd(wolf_jaws$length)/sqrt(nrow(wolf_jaws))
 
 ```
 
-In this sample, the mean jaw length was **`r jaw_mean` cm** and the stdev was **`r jaw_std` cm**.
+In this sample, the mean jaw length was **`r jaw_mean` cm** and the standard error was **`r jaw_sterr` cm**.
 
 
 <!-- forced_linebreak -->
@@ -393,11 +395,11 @@ In this sample, the mean jaw length was **`r jaw_mean` cm** and the stdev was **
 
 #### c. Find the 95% confidence interval for the mean.
 
-We'll use a t distribution, because the sample size is small. 
+We'll use a t distribution, because the sample size is small. This requires assuming that the sample is a random sample, and that the real distribution is normal (both of which seem like reasonable assumptions here).
 
 ```{r}
 
-spread_95 <- qt(0.975, df=nrow(wolf_jaws)-1) * jaw_std/sqrt(nrow(wolf_jaws))
+spread_95 <- qt(0.975, df=nrow(wolf_jaws)-1) * jaw_sterr
 
 jaw_lower <- jaw_mean - spread_95
 jaw_upper <- jaw_mean + spread_95
@@ -407,7 +409,7 @@ jaw_upper <- jaw_mean + spread_95
 A 95% confidence interval for the true mean jaw length for wolves from this population is:
 
 
-**`r round(jaw_lower,3)` $<\mu_{jaw\_length} <$ `r round(jaw_upper,3)`**
+**`r round(jaw_lower,3)` cm $<\mu_{jaw\_length} <$ `r round(jaw_upper,3)` cm**
 
 
 <!-- forced_linebreak -->
@@ -415,11 +417,106 @@ A 95% confidence interval for the true mean jaw length for wolves from this popu
 
 #### d. Find the 99% confidence interval for the variance.
 
+The confidence interval for the variance is given as:
+
+\[
+\frac{df s^2}{\chi^2_{\alpha/2,df}} < \sigma^2 < \frac{df s^2}{\chi^2_{1-\alpha/2,df}}
+\]
+
+assuming that the sample is a random sample, and that the real distribution is normal (both of which seem like reasonable assumptions here).
+
+So, we can find the distribution as:
+
+```{r} 
+
+jaw_df <- nrow(wolf_jaws)-1
+jaw_std <- sd(wolf_jaws$length)
+
+jaw_var_lower <- jaw_df*jaw_std^2 / qchisq(0.995, df=jaw_df)
+jaw_var_upper <- jaw_df*jaw_std^2 / qchisq(0.005, df=jaw_df)
+
+```
+
+A 99% confidence interval for the true variance in jaw length for wolves from this population is:
+
+**`r round(jaw_var_lower,3)` $cm^2 <\sigma^2_{jaw\_length} <$ `r round(jaw_var_upper,3)` $cm^2$**
+
 <!-- forced_linebreak -->
 &nbsp;
 
 #### e) Find the 99% confidence interval for the standard deviation.
 
+We can get the standard deviation confidence interval by getting the variance interval and taking the square root.
+
+```{r} 
+
+jaw_std_lower <- sqrt(jaw_var_lower)
+jaw_std_upper <- sqrt(jaw_var_upper)
+
+```
+
+A 99% confidence interval for the true standard deviation in jaw length for wolves from this population is:
+
+**`r round(jaw_std_lower,3)` cm $<\sigma_{jaw\_length} <$ `r round(jaw_std_upper,3)` cm**
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+### 6) Childless Couples
+
+**An analyst is interested in knowing whether the proportion of childless couples in a community deviates significantly from the statewide average of 0.12. A sample of 100 couples is interviewed; the mean proportion of childless couples in the samples is found to be 0.16. Construct the 95% confidence interval around the sample proportion and determine whether the analyst should accept the notion that the “true” proportion could be 0.12.**
+
+We'll construct a confidence interval using the normal distribution, because the sample is not excessively small:
+
+```{r}
+
+couple_sterr <- 1
+couple_mean <- 0.16
+
+couple_spread_95 <- qnorm(0.975) * couple_sterr
+
+couple_lower <- couple_mean - couple_spread_95
+couple_upper <- couple_mean + couple_spread_95
+
+
+```
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+### 7) Stream Pollutants
+
+**A researcher suspects that the level of a particular stream’s pollutant is higher than the allowable limit of 4.2 mg/l. A sample of n = 17 reveals a mean pollutant level of 6.4 mg/l with a standard deviation of 4.4 mg/l. Is there sufficient evidence that the stream’s pollutant level exceeds the allowable limit? What is the P-value?**
+
+We'll assume that the actual stream pollutant values being sampled are normally distributed and that the sample is a random one.
+
+We can estimate the probability of getting a mean value of 6.4 mg/L or higher if the actual mean is 4.2 mg/L and the standard deviation is 4.4 mg/L:
+
+```{r}
+
+couple_sterr <- 4.2/sqrt(17)
+
+pollution_prob <- pt((4.2-6.4)/couple_sterr, df=17)
+
+```
+
+The probability of getting a sample mean of 6.4 mg/L with a population mean of 4.2 mg/L is only **`r pollution_prob`**, which is lower than the typical $alpha$ value of 0.05, so it would be reasonable to conclude here that the stream's pollution level exceeds the allowable limit!
+
 <!-- forced_linebreak -->
 &nbsp;
 <!-- forced_linebreak -->
@@ -433,5 +530,605 @@ A 95% confidence interval for the true mean jaw length for wolves from this popu
 
 
 
+### 8)
 
+**Can death rates be influenced by tax incentives? Kopczuk and Slemrod (2003) investigated this possibility using data on deaths in the US in years in which the government announced it was changing (usually raising) the tax rate on inheritance (the estate tax). The authors calculated the death rate during the 14 days before, and the 14 
+days after, the changes in the estate tax took effect. The number of deaths per day for each of these periods is given in the following table.**
+
+```{r}
+
+deaths <- data.frame(year = c(1917, 1917, 1919, 1924, 1926, 1932, 1934, 1935, 1940, 1941, 1942),
+                     deaths_high = c(22.21, 18.86, 28.21, 31.64, 18.43, 9.50, 24.29, 26.64, 35.07, 38.86, 28.50),
+                     deaths_low = c(24.93, 20.00, 29.93, 30.64, 20.86, 10.14, 28.00, 25.29, 35.00, 37.57, 34.79))
+
+kable(deaths) %>% kable_styling()
+
+```
+
+**Use the paired t-test to ask whether the death rate changed significantly after the estate tax rate change.**
+
+#### a) State the null and alternate hypotheses for this analysis.
+
+Ho: There is no significant difference in the death rate during the higher and lower tax rate period immediately around a change in tax rate (mean change is zero).
+
+Ha: There is a significant difference in the death rate during the higher and lower tax rate period immediately around a change in tax rate (mean change is NOT zero).
+
+Assumptions:
+
+1) Both samples are random samples
+2) The difference in death rates is normally distributed
+
+These both seem like reasonable assumptions in this context, although it is difficult to assess whether the differences are normal because the sample size is small.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### b) Why might a paired t-test be an appropriate method to apply to this comparison?
+
+All the data are actually paired, because they occurred immediately before and after the change to tax rate. This helps control for other factors which would impact death rate at different times.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### c) For each change in the estate tax, calculate the difference in death rate between the higher and lower tax regimes.
+
+```{r}
+
+deaths$difference <- deaths$deaths_low - deaths$deaths_high
+kable(deaths) %>% kable_styling()
+
+```
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### d) What is the mean of this difference?
+
+```{r}
+
+death_diff_mean <- mean(deaths$difference)
+
+```
+
+On average, the death rates under the lower tax rate times exceeded the paired death rates from higher tax rate times by **`r death_diff_mean`** deaths per day.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### e) What is the standard deviation of the difference?
+
+```{r}
+
+death_diff_stdev <- mean(deaths$difference)
+
+```
+
+The standard deviation of the difference in death rates under the lower tax rate times versus the paired death rates from higher tax rate times is **`r death_diff_stdev`** deaths per day.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### f) What is the sample size?
+
+```{r}
+
+death_n <- nrow(deaths)
+  
+```
+
+
+The sample size here is **`r death_n`** - the total number of taxrate switching events.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### g) What is the standard error of the mean difference?
+
+```{r}
+
+death_sterr <- death_diff_stdev / sqrt(death_n)
+
+```
+
+The standard error in the difference in death rate between lower and higher tax rates is **`r death_sterr`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### h) Calculate t for this test.i.How many degrees of freedom will this paired t-statistic have?
+
+```{r}
+
+death_t <- (death_diff_mean - 0) / death_sterr
+
+```
+
+The t value here is **`r death_t`**. There are **`r death_n -1`** degrees of freedom.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### j) What is the critical value for the test, corresponding to $\alpha$= 0.05?
+
+```{r}
+
+death_t_crit <- qt(0.975, df = death_n-1)
+
+```
+The critical value here for $\alpha=0.05$ is **`r death_t_crit`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### k) What is the P-value associated with the test statistic, and what is the conclusion from the test?
+
+```{r}
+
+death_p_val <- 1-pt(death_t, df=death_n-1)
+
+```
+
+The p-value for this test is **`r death_p_val`**. Because this value is smaller than $\alpha=0.05$, we can reject the null hypothesis that there is no difference between mean death rate for the higher and lower tax rate periods. There does seem to be an effect between tax rate and death rate.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### l) What scientific conclusion do you draw from these findings?
+
+It appears that more people die during the low tax rate periods than during low tax rate periods. This is alarming because the question prompt notes that the rate is usually being raised, which implies that if death time is being altered based on tax rate, the deaths are being *accelerated* to avoid higher taxes. 
+
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+### 9) Colored Dreams
+
+**It was thought that humans dreamed in black and white rather than color. A recent hypothesis is that North Americans did in fact dream in black and white in the era of black-and-white television and movies, but that we shifted back to dream in color media. To test this hypothesis, Murzyn (2008) queried 30 older individuals who had grown up in the black-and-white era and 30 younger individuals who grew up with color media about their dreams. She recorded the percentage of color dreams for each individual. A mean of 68.4% of the younger peoples’ dreams were in color (with standard deviation of 31.8%). On average, 33.9% of the older individuals’ dreams were in color, with a standard deviation of 36.9%. The scores were approximately normally distributed in each group. Is the difference between the two means statistically significant? Use a two-sample t-test for this comparison.**
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### a) State the null and alternate hypotheses for this test.
+
+Ho: There is no difference in the rates at which young and old people dream in color.
+
+Ha: There is a difference in therates at which young and old people dream in color.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### b) What are the assumptions of a two-sample t-test? Do these data match these assumptions well enough?
+
+1) Both samples are random samples
+2) The difference in death rates is normally distributed
+3) The standard deviations of both populations is the same
+
+The first one should be a good assumption if the study methodology was designed well. The question states that the second assumption is met, and the third assumption is met based on the small difference in standard deviation values (31.8% and 36.9%) and the reasonably good sample size (30).
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### c) What are the sample variances for each group?
+
+```{r}
+
+var_old <- .369^2
+var_young <- .318^2
+
+```
+
+The variances for the old and young groups are respectively **`r var_old`** and **`r var_young`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### d) How many degrees of freedom are associated with each group?
+
+Both groups have **`r 29`** degrees of freedom. 
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### e) Calculate the pooled variance for these data.
+
+```{r}
+
+pooled_var_dreams <- ((30-1)*var_old + (30-1)*var_young) / (30+30-2)
+
+```
+
+The pooled variance is **`r pooled_var_dreams`**
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### f) Whatis the standard error of the difference between means?
+
+```{r}
+
+sterr_dreams <- sqrt(pooled_var_dreams*(1/30 + 1/30))
+
+```
+
+The standard error of the difference bewteen means is **`r sterr_dreams`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### g) Calculate t.
+
+```{r}
+
+dreams_t <- (.684-.339)/sterr_dreams
+
+```
+
+The t statistic for this test is **`r dreams_t`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### h) How many degrees of freedom does this t-statistic have?
+
+The t statistic has **58** degrees of freedom.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+i.What is the critical value of t with $\alpha=0.05$ for this test?
+
+```{r}
+
+crit_t_dreams <- qt(0.975, df=58)
+
+```
+
+The critical value of t for $\alpha=0.05$ is **`r crit_t_dreams`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### j) What is the most precise P-value that you can determine for this test?
+
+Using scripts there isn't really an important limitation onestimating p-value precision like there is with a table. 
+
+```{r}
+
+p_val_dreams <- 1-pt(dreams_t, df=58) 
+
+```
+
+The p-value here is about **`r sprintf("%.5g", p_val_dreams)`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### k) What can you conclude about the difference between the older and younger people in how often they dream in color? Interpret the conclusions of the test in terms of the original scientific question.
+
+Because the p-value we got was tiny, we can reject the null hypothesis. We can assume that there is a significant difference in the rate at which young and old people report dreaming in color. Young people appear to have colored dreams much more often than older people (about twice as often).
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+### 10) Mosquitoes 
+
+**Mosquitoes find their victims in part by odor, so it makes sense to wonder whether what we eat and drink influences our attractiveness to mosquitoes. A study in West Africa (Lefèvre et al., 2010), addressed this question by working with the mosquito species that carry malaria. They wondered whether drinking the local beer influenced attractiveness to mosquitoes. They opened a container holding 50 mosquitoes next to each of 25 alcohol-free participants and measured the proportion of mosquitoes that left the container and flew toward the participants (they called this proportion the “activation”). They repeated this procedure 15 minutes after each of the same participants had consumed a liter of beer and measured the “change in activation” (after minus before). This procedure was also carried out on another 18 human participants who were given water instead of beer. The change in activation of mosquitoes is given for both the beer-and water-drinking groups:**
+
+```{r}
+
+mosquitoes <- data.frame(treatment = c(rep("beer",25), rep("water",18)),
+                        attraction = c(0.36, 0.46, 0.06, 0.18, 0.25, 0.18, -0.06, -0.14, 0.12, 0.39, 0.17, -0.16, -0.05, 0.19, 0.25, 0.31, 0.17, -0.03, 0.23, -0.03, 0.26, 0.30, 0.11, 0.13, 0.21, 0.04, 0, -0.08, -0.12, 0.201, -0.039, 0.10, 0.041, 0.02, 0.236, 0.05, 0.097, 0.122, -0.019, 0.021, -0.08, -0.165, -0.28))
+
+```
+<!-- forced_linebreak -->
+&nbsp;
+
+#### a) Compare the frequency distributions of the two samples. What trend do you see?
+
+```{r}
+
+ggplot(data=mosquitoes) + 
+  geom_histogram(aes(x=attraction)) + 
+  facet_wrap(~treatment, dir="v")
+  
+
+```
+
+The mean value for the beer drinkers appears to be somewhat higher, although both curves overlap. The spread seems similar across both distributions, both of which seem reasonably normal.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### b) Test for a difference between the mean changes in mosquito activation between beer-drinking and water-drinking groups.
+
+We've just noted that the spread seems similar across both distributions, and that they appear normal. We'll also need to assume that the human subjects were randomly selected from the population.
+
+Ho: There is no difference in mean activaiton for beer drinkers and water drinkers.
+
+Ha: Mean activation is higher for beer drinkers than for water drinkers.
+
+```{r}
+
+mosquito_test <- t.test(mosquitoes[mosquitoes$treatment=="beer",]$attraction, mosquitoes[mosquitoes$treatment=="water",]$attraction)
+
+```
+
+Running a t-test with df=`r mosquito_test$parameter`, we get a t-value of `r mosquito_test$statistic` and a p-value of `r mosquito_test$p.value`. Because $\alpha=0.05 >> p$, we can reject the null hypothesis that there is no difference in mean activation between the beer and water drinkers. Beer drinkers exhibited higher mosquito activation than did water drinkers, by on average about `r (mean(mosquitoes[mosquitoes$treatment=="beer",]$attraction)-mean(mosquitoes[mosquitoes$treatment=="water",]$attraction)) / mean(mosquitoes[mosquitoes$treatment=="water",]$attraction)*100`%.
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+### 11) Ostriches 
+
+**Ostriches live in hot environments, and they are normally exposed to the sun for long periods. Mammals in similar environments have special mechanisms for reducing the temperature of their brain relative to their body temperature. Fuller et al. (2003) tested whether ostriches could do the same. The mean body and brain temperature of six ostriches was recorded at typical hot conditions. The results, in degrees Celsius, are as follows:**
+ 
+```{r}
+
+ostriches <- data.frame(ostrich = c(1,2,3,4,5,6),
+                        body_temp = c(38.51, 38.45, 38.27, 38.52, 38.62, 38.18),
+                        brain_temp = c(39.32, 39.21, 39.20, 38.68, 39.09, 38.94))
+ostriches$difference <- ostriches$brain_temp - ostriches$body_temp
+
+kable(ostriches) %>% kable_styling()
+
+```
+
+#### a) Test for a mean difference in temperature between body and brain for these ostriches.
+
+We can run a paired test because each ostrich has one body and one brian. We'll need to assume that the human subjects were randomly selected from the population and that the mean temperature difference is normally distributed across ostriches.
+
+Ho: There is no difference in mean body and brain temperature in ostriches.
+
+Ha: There is a difference in mean body and brain temperature in ostriches.
+
+```{r}
+
+ostrich_test <- t.test(ostriches$difference)
+
+```
+
+Running a t-test with df=`r ostrich_test$parameter`, we get a t-value of `r ostrich_test$statistic` and a p-value of `r ostrich_test$p.value`. Because $\alpha=0.05 >> p$, we can reject the null hypothesis that there is no difference in mean temperature in ostrich brains and bodies. Brain temperatures tend to be higher by on average about `r mean(ostriches$difference)` degrees C.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### b) Compare the results to the prediction made from mammals in similar environments.
+
+Ostrich brains actually seem to be higher than their body temperatures, in contrast to their mammalian friends. This doesn't mean that ostriches don't have adaptations to cool their brains, though. Brains consume a large amount of metabolic energy and produce meaningful amounts of heat, so it could also be that ostriches are just supergeniuses that devote enormous metabolic energy to their brains.
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+### 12) Household Child Rates
+
+**The mean number of children among a sample of 15 low-income households is 2.8. The mean number of children among a sample of 19 high-income households is 2.4. The standard deviations for low-and high-income households are found to be 1.6 and 1.7, respectively. Test the hypothesis of no difference against the alternative that high-income households have fewer children. Use a pooled estimate of the variance.**
+
+We'll run an independent two-sample t-test. We'll need to assume that the households were randomly selected from the population and that the mean number of children difference is normally distributed across households. We'll also assume that the population variances are the same in both income groups (which enables us to estimate the pooled variance).
+
+Ho: There is no difference in mean number of children between low and high income households.
+
+Ha: High income households have fewer children.
+
+```{r}
+
+children_pooled_var <- ((15-1)*1.6^2 + (19-1)*1.7^2)/(15+19-2)
+children_t <- (2.8-2.4)/(children_pooled_var*sqrt(1/15+1/19))
+
+children_p <- 1-pt(children_t, df=(15+19-2))
+
+```
+
+We found a pooled variance of `r children_pooled_var`. Running a t-test with df=32, we get a t-value of `r children_t` and a p-value of `r children_p`. Because $\alpha=0.05 < p$, we cannot reject the null hypothesis that there is no difference in the number of mean children between low-income and high-income households. 
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+
+
+### 13) Recycling Paper 
+
+**Recycling paper has some obvious benefits, but it may have unintended consequences. For example, perhaps people are less careful about how much paper they use if they know that their waste will be recycled. Catlin and Wang (2013) tested this idea by measuring paper use in two groups of experimental participants. Each person was placed in a room alone with scissors, paper, and a trash can, and was told that he or she was testing the scissors. In the “recycling” group only, there was also a recycling bin in the room. The amount of paper used by each participant was measured in grams. The data from each person are listed below.**
+
+```{r}
+
+no_bin <- c(4, 4, 4, 4, 4, 4, 4, 5, 8, 9, 9, 9, 9, 12, 12, 13, 14, 14, 14, 14, 15, 23)
+bin <- c(4, 5, 8, 8, 8, 9, 9, 9, 12, 14, 14, 15, 16, 19, 23, 28, 40, 43, 129, 130)
+
+paper <- data.frame(treatment = c(rep("no_bin", length(no_bin)),rep("bin", length(bin))),
+                    paper = c(no_bin,bin))
+
+```
+
+
+#### a) Make and examine histograms of these data. Are the frequency distributions of paper use in the two treatment groups similar in shape and spread?
+
+```{r}
+
+ggplot(data=paper) + 
+  geom_histogram(aes(x=paper)) + 
+  facet_wrap(~treatment, dir="v")
+
+```
+
+The bin data look skewed right, with one huge outlier value. The no-bin data look more clumped, less normal, and with a slightly lower mean even disregarding the bin outliers. I would not say that these distributions are similar in shape and spread.
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### b) Based on your results in part a, discuss your options for testing a difference between these two groups in the amount of paper used.
+
+Because the distributions aren't normal and have apparently different variances, it would be difficult to use a parametric test like the t-test. We could use a rank-based test instead, though, which have less stringent assumptions.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### c) Apply a Mann-Whitney U-test to test the hypothesis that these two treatments have the same distribution of paper use. State the nulland alternative hypotheses clearly.
+
+Ho: There is no difference in the frequency distribution of paper usage in the two groups.
+
+Ha: There is a difference in the frequency distribution of paper usage in the two groups.
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### d) Rank all the values of paper use from smallest to largest. Properly account for ties.
+
+```{r}
+
+paper$ranks <- rank(paper$paper)
+
+kable(paper) %>% kable_styling()
+
+```
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### e) For each treatment group, calculate the rank sum and the sample size.
+
+```{r}
+
+r_bin <- sum(paper[paper$treatment=="bin",]$rank)
+r_nobin <- sum(paper[paper$treatment=="no_bin",]$rank)
+n_bin <- nrow(paper[paper$treatment=="bin",])
+n_nobin <- nrow(paper[paper$treatment=="no_bin",])
+
+```
+
+The rank sum and sample size for the bin group are **`r r_bin`** and **`r n_bin`**. The rank sum and sample size for the no-bin group are **`r r_nobin`** and **`r n_nobin`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### f) Calculate the Mann-Whitney U1value for the treatment without the recycling bin.
+
+```{r}
+
+U_nobin <- n_bin*n_nobin + (n_nobin*(n_nobin+1))/2 - r_nobin
+
+```
+
+The U1 value for the no-bin treatment is **`r U_nobin`**.
+
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### g) Using the result from part f, calculate U2for the treatment with the recycling bin.h.What is the value of test statistic U?
+
+```{r}
+
+U_bin <- n_bin*n_nobin - U_nobin
+
+```
+
+The U2 value for the bin treatment is **`r U_bin`**.
+
+<!-- forced_linebreak -->
+&nbsp;
+
+#### i) Calculate P-value as accurately as you can, state the conclusion of the test, and interpret the results.
+
+We can find the p-value for a given U statistic as:
+
+```{r}
+
+pwilcox(max(U_bin,U_nobin), n_bin, n_nobin, lower.tail=F)
+
+```
+
+Because our p-value is much smaller than $\alpha=0.05$, we can reject the null hypothesis that the frequency distributions of the paper usage between recycling and non-recycling bin groups. The median value of paper use for the group with a recycling bin was significantly higher. 
+
+
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+<!-- forced_linebreak -->
+&nbsp;
+
+
+
+
+
+### 14 Mosquitoes Again
+
+**The distribution of body size of mosquitoes (as measured by weight) is known to be log-normal. The (untransformed) weights of 11 female and nine male mosquitoes are given below in milligrams. Do the two sexes weigh the same on average?**
+
+```{r}
+
+f_mosq <- log(c(0.291, 0.208, 0.241, 0.437, 0.228, 0.256, 0.208, 0.234, 0.320, 0.340, 0.150))
+m_mosq <- log(c(0.185, 0.222, 0.149, 0.187, 0.191, 0.219, 0.132, 0.144, 0.140))
+
+hist(f_mosq)
+
+hist(m_mosq)
+
+sd(f_mosq)
+
+sd(m_mosq)
+
+```
+
+We'll ignore the fact that the male distribution doesn't look normal (it seems bimodal, maybe just by chance with the small sample size) because the question states that the population distribution is normal. The variances don't differ hugely either, and we'll assume that the mosquitoes used are a random sample of the population. We'll run an unpaired t-test to check whether the means differ:
+
+Ho: There is no difference in mean mass between male and female mosquitoes.
+
+Ha: There is a difference in mean mass between male and female mosquitoes. 
+
+
+```{r}
+
+mosquito_test <- t.test(f_mosq, m_mosq)
+
+```
+
+Running a t-test with df=`r mosquito_test$parameter`, we get a t-value of `r mosquito_test$statistic` and a p-value of `r mosquito_test$p.value`. Because $\alpha=0.05 >> p$, we can reject the null hypothesis that there is no difference in mean log-mass in ostrich brains and bodies. Body masses do differ between male and female mosquitoes, with females weighing `r mean(f_mosq) - mean(m_mosq)` mg more on average.
 
